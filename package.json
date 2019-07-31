@@ -1,0 +1,30 @@
+{
+  "name": "uds-logger",
+  "version": "0.0.1",
+  "description": "UDS over ISO-TP over CAN over OBD-II logger",
+  "main": "index.js",
+  "scripts": {
+    "start": "SOURCE_ID='7e8' DESTINATION_ID='7e0' INTERFACE_NAME='can0' stdbuf -i0 -o0 -e0 isotprecv $INTERFACE_NAME -l -s $SOURCE_ID -d =$DESTINATION_ID -p AA:AA | node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brandonros/uds-logger.git"
+  },
+  "keywords": [
+    "can",
+    "obd",
+    "isotp",
+    "uds",
+    "log"
+  ],
+  "author": "Brandon Ros",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brandonros/uds-logger/issues"
+  },
+  "homepage": "https://github.com/brandonros/uds-logger#readme",
+  "dependencies": {
+    "execa": "^2.0.3",
+    "split": "^1.0.1"
+  }
+}
