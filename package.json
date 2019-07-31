@@ -4,7 +4,12 @@
   "description": "UDS over ISO-TP over CAN over OBD-II logger",
   "main": "index.js",
   "scripts": {
-    "start": "SOURCE_ID='7e8' DESTINATION_ID='7e0' INTERFACE_NAME='can0' stdbuf -i0 -o0 -e0 isotprecv $INTERFACE_NAME -l -s $SOURCE_ID -d =$DESTINATION_ID -p AA:AA | node index.js"
+    "start": "stdbuf -i0 -o0 -e0 isotprecv $npm_package_config_interface_name -l -s $npm_package_config_source_id -d $npm_package_config_destination_id -p AA:AA | node index.js"
+  },
+  "config": {
+    "source_id": "7e0",
+    "destination_id": "7e8",
+    "interface_name": "can0"
   },
   "repository": {
     "type": "git",

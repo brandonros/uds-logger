@@ -1,10 +1,12 @@
 const EventEmitter = require('events')
 const split = require('split')
 const execa = require('execa')
+const assert = require('assert')
+const parameters = require('./parameters')
 
-const interfaceName = process.env.INTERFACE_NAME
-const sourceId = process.env.SOURCE_ID
-const destinationId = process.env.DESTINATION_ID
+const interfaceName = process.env.npm_package_config_interface_name
+const sourceId = process.env.npm_package_config_source_id
+const destinationId = process.env.npm_package_config_destination_id
 
 const emitter = new EventEmitter()
 
@@ -19,38 +21,42 @@ const send = async (serviceIdentifier, response) => {
   await subprocess
 }
 
-const recv = () => new Promise(resolve => emitter.once('message', resolve))
-
-const readDataByIdentifier = async (dataIdentifier) => {
-  await send(0x22, Buffer.from([dataIdentifier >> 8, dataIdentifier & 0xFF]))
-  return recv()
+const showCurrentData = async (parameterIdentifier) => {
+  await send(0x01, Buffer.from([parameterIdentifier]))
+  return new Promise(resolve => emitter.once(`showCurrentData:${parameterIdentifier.toString(16).padStart(2, '0')}`, resolve))
 }
 
-const loggingLoop = async (dataIdentifier) => {
+const calculateValue = (input, formula) => {
+  const a = input[0]
+  const b = input[1]
+  return eval(formula)
+}
+
+const loggingLoop = async (parameterIdentifier, name, formula, unit) => {
   for (;;) {
-    const response = await readDataByIdentifier(dataIdentifier)
-    console.log(response)
+    const response = await showCurrentData(parameterIdentifier)
+    console.log(`parameterIdentifier=${parameterIdentifier.toString(16).padStart(2, '0')} name=${name} formula=${formula} unit=${unit} value=${calculateValue(response, formula)}`)
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
 }
 
 const run = async () => {
-  const parameters = [
-    {id: 0x000C, name: 'Engine RPM', formula: '(256 * a + b) / 4', unit: 'rpm'},
-    {id: 0x000D, name: 'Vehicle speed', formula: 'a', unit: 'km/h'},
-    {id: 0x0011, name: 'Throttle position', formula: 'a * 100 / 255', unit: '%'},
-    {id: 0x0005, name: 'Coolant temperature', formula: 'a - 40', unit: 'C'},
-    {id: 0x000F, name: 'Intake air temperature', formula: 'a - 40', unit: 'C'},
-    {id: 0x0046, name: 'Ambient air temperature', formula: 'a - 40', unit: 'C'}
-  ]
-  for (let i = 0; i < parameters.length; ++i) {
+  for (let i = 0; i < 2; ++i) {
     const parameter = parameters[i]
-    loggingLoop(parameter.id)
+    loggingLoop(parameter.id, parameter.name, parameter.formula, parameter.unit)
   }
 }
 
 process.stdin
   .pipe(split())
-  .on('data', (data) => emitter.emit('message', Buffer.from(data.replace(/ /g, ''), 'hex')))
+  .on('data', (data) => {
+    data = Buffer.from(data.replace(/ /g, ''), 'hex')
+    const responseServiceIdentifier = data[0]
+    if (responseServiceIdentifier === 0x41) {
+      const parameterIdentifier = data[1].toString(16).padStart(2, '0')
+      console.log(`showCurrentData:${parameterIdentifier}`)
+      emitter.emit(`showCurrentData:${parameterIdentifier}`, data.slice(2))
+    }
+  })
 
 run()
