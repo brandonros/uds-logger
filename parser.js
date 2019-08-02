@@ -16,8 +16,7 @@ keys.sort()
 
 keys.forEach(key => {
   const values = Array.from(new Set(pids[key]))
-  if (values.length === 1) {
+  if (values.length !== 1) {
     console.log(key)
-    console.log(values)
   }
 })

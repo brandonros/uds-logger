@@ -3,6 +3,7 @@ const execa = require('execa')
 const low = require('lowdb')
 const Adapter = require('lowdb/adapters/FileSync')
 
+const logs = {}
 const pids = require('./pids-that-dont-change')
 
 const interfaceName = process.env.npm_package_config_interface_name
@@ -48,7 +49,13 @@ process.stdin
     if (responseServiceIdentifier === 0x62) {
       const pid = data.slice(1, 3).toString('hex')
       const value = data.slice(3).toString('hex')
-      console.log({ pid, value, time: Date.now() })
+      if (!logs[pid]) {
+        logs[pid] = new Set()
+      }
+      if (!logs[pid].has(value)) {
+        console.log({ pid, value, time: Date.now() })
+        logs[pid].add(value)
+      }
       db.get('logs')
         .push({ pid, value, time: Date.now() })
         .write()
