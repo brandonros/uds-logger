@@ -4,7 +4,8 @@
   "description": "UDS over ISO-TP over CAN over OBD-II logger",
   "main": "index.js",
   "scripts": {
-    "start": "stdbuf -i0 -o0 -e0 isotprecv $npm_package_config_interface_name -l -s $npm_package_config_source_id -d $npm_package_config_destination_id -p AA:AA | node index.js"
+    "start": "stdbuf -i0 -o0 -e0 isotprecv $npm_package_config_interface_name -l -s $npm_package_config_source_id -d $npm_package_config_destination_id -p AA:AA | node index.js",
+    "debug": "stdbuf -i0 -o0 -e0 isotprecv $npm_package_config_interface_name -l -s $npm_package_config_source_id -d $npm_package_config_destination_id -p AA:AA | node debug.js"
   },
   "config": {
     "source_id": "7e0",
@@ -30,6 +31,7 @@
   "homepage": "https://github.com/brandonros/uds-logger#readme",
   "dependencies": {
     "execa": "^2.0.3",
+    "lowdb": "^1.0.0",
     "split": "^1.0.1"
   }
 }
