@@ -1,9 +1,9 @@
 const split = require('split')
 const execa = require('execa')
 const low = require('lowdb')
-const Adapter = require('lowdb/adapters/FileAsync')
+const Adapter = require('lowdb/adapters/FileSync')
 
-const pids = require('./pids')
+const pids = require('./pids-that-dont-change')
 
 const interfaceName = process.env.npm_package_config_interface_name
 const sourceId = process.env.npm_package_config_source_id
