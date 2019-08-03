@@ -4,7 +4,7 @@ const low = require('lowdb')
 const Adapter = require('lowdb/adapters/FileSync')
 
 const logs = {}
-const pids = require('./pids-that-dont-change')
+const pids = require('./pids-that-barely-change')
 
 const interfaceName = process.env.npm_package_config_interface_name
 const sourceId = process.env.npm_package_config_source_id
@@ -31,11 +31,20 @@ const showCurrentData = async (parameterIdentifier) => {
 
 const run = async () => {
   for (;;) {
-    for (let i = 0; i < pids.length; ++i) {
-      const pid = pids[i]
-      await showCurrentData(pid)
+    for (let i = 0; i < pids.length; i += 8) {
+      await Promise.all([
+        showCurrentData(pids[i + 0]),
+        showCurrentData(pids[i + 1]),
+        showCurrentData(pids[i + 2]),
+        showCurrentData(pids[i + 3]),
+        showCurrentData(pids[i + 4]),
+        showCurrentData(pids[i + 5]),
+        showCurrentData(pids[i + 6]),
+        showCurrentData(pids[i + 7])
+      ])
       await new Promise(resolve => setTimeout(resolve, 25))
     }
+    console.log(`${Date.now()} looped`)
   }
 }
 
@@ -53,7 +62,7 @@ process.stdin
         logs[pid] = new Set()
       }
       if (!logs[pid].has(value)) {
-        console.log({ pid, value, time: Date.now() })
+        console.log(JSON.stringify({ pid, value, time: Date.now() }))
         logs[pid].add(value)
       }
       db.get('logs')
