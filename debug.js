@@ -1,4 +1,3 @@
-const fetch = require('node-fetch')
 const split = require('split')
 const execa = require('execa')
 const pids = require('./all-pids')
@@ -27,30 +26,18 @@ const readDataByIdentifier = async (parameterIdentifier) => {
   ]))
 }
 
-const logsPids = async () => {
-  for (;;) {
-    for (let i = 0; i < pids.length; i += chunkSize) {
-      const pidsChunk = pids.slice(i, i + chunkSize)
-      await Promise.all(pidsChunk.map(pid => readDataByIdentifier(pid)))
-      await new Promise(resolve => setTimeout(resolve, tickResolution))
-    }
-    console.log(`${Date.now()} looped`)
+const requestPidsLoop = async () => {
+  console.error(`requestPidsLoop: ${Date.now()} start`)
+  for (let i = 0; i < pids.length; i += chunkSize) {
+    const pidsChunk = pids.slice(i, i + chunkSize)
+    await Promise.all(pidsChunk.map(pid => readDataByIdentifier(pid)))
+    await new Promise(resolve => setTimeout(resolve, tickResolution))
   }
-}
-
-const uploadLogs = (logs) => {
-  console.log('Uploading logs...')
-  return fetch('https://api.modlog.co/logs', {
-    method: 'post',
-    body: JSON.stringify(logs),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+  console.error(`requestPidsLoop: ${Date.now()} end`)
+  requestPidsLoop()
 }
 
 const initRecvSubprocess = () => {
-  let logQueue = []
   const subprocess = execa('isotprecv', [
     interfaceName,
     '-l',
@@ -66,15 +53,8 @@ const initRecvSubprocess = () => {
       if (responseServiceIdentifier === 0x62) {
         const pid = data.slice(1, 3).toString('hex')
         const value = data.slice(3).toString('hex')
-        logQueue.push({
-          pid,
-          value,
-          time: (new Date()).toISOString()
-        })
-        if (logQueue.length === 64) {
-          uploadLogs(logQueue)
-          logQueue = []
-        }
+        const time = (new Date()).toISOString()
+        console.log(JSON.stringify({ vin, pid, value, time }))
       }
     })
 }

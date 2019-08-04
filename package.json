@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "stdbuf -i0 -o0 -e0 isotprecv $npm_package_config_interface_name -l -s $npm_package_config_source_id -d $npm_package_config_destination_id -p AA:AA | node index.js",
-    "debug": "stdbuf -i0 -o0 -e0 isotprecv $npm_package_config_interface_name -l -s $npm_package_config_source_id -d $npm_package_config_destination_id -p AA:AA | node debug.js"
+    "debug": "node debug.js"
   },
   "config": {
     "chunkSize": 16,
