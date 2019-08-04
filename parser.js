@@ -1,23 +1,30 @@
 const fs = require('fs')
+const pids = require('./all-pids')
 const db = JSON.parse(fs.readFileSync('db.json'))
 
-const pids = {}
+const map = {}
 
 db.logs.forEach(log => {
   const key = log.pid
-  if (!pids[key]) {
-    pids[key] = []
+  if (!map[key]) {
+    map[key] = []
   }
-  pids[key].push(log.value)
+  map[key].push(log.value)
 })
 
-const keys = Object.keys(pids)
-keys.sort()
+pids.sort((a, b) => {
+  a = a.toString(16).padStart(4, '0')
+  b = b.toString(16).padStart(4, '0')
+  const aValues = map[a] || []
+  const bValues = map[b] || []
+  return bValues.length - aValues.length
+})
 
-keys.forEach(key => {
-  const values = Array.from(new Set(pids[key]))
-  if (values.length > 5) {
-    console.log(key)
-
-  }
+pids.forEach(pid => {
+  pid = pid.toString(16).padStart(4, '0')
+  const values = map[pid] || []
+  console.log({
+    pid,
+    values
+  })
 })

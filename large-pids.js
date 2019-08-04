@@ -6,4 +6,5 @@ module.exports = [
   0xc111, // 50 bytes (large)
   0xf15a, // 100 bytes (large)
   0xf808, // 41 bytes (large)
+  0x6511, // 118 bytes
 ]
