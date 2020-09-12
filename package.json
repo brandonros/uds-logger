@@ -35,7 +35,7 @@
   "dependencies": {
     "execa": "^2.0.3",
     "lowdb": "^1.0.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "split": "^1.0.1"
   }
 }
